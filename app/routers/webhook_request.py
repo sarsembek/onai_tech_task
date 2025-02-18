@@ -10,6 +10,7 @@ from slowapi import Limiter
 from slowapi.util import get_remote_address
 from rq import Queue
 from redis import Redis
+import os
 
 router = APIRouter()
 
@@ -19,11 +20,12 @@ logger = logging.getLogger(__name__)
 
 # Rate limiting
 limiter = Limiter(key_func=get_remote_address)
-redis_conn = Redis()
+redis_url = os.getenv("REDIS_URL", "redis://redis:6379/0")
+redis_conn = Redis.from_url(redis_url)
 task_queue = Queue(connection=redis_conn)
 
 @router.post("/webhook")
-@limiter.limit("5/minute")
+@limiter.limit("10/minute")
 async def handle_webhook(request: Request, request_data: WebhookRequestSchema, db: Session = Depends(get_db)):
     # Сохранение запроса в БД
     webhook_entry = WebhookRequest(message=request_data.message, callback_url=str(request_data.callback_url))
@@ -33,7 +35,7 @@ async def handle_webhook(request: Request, request_data: WebhookRequestSchema, d
 
     try:
         # Enqueue the task to Redis Queue
-        job = task_queue.enqueue(process_webhook_request, request_data, db)
+        job = task_queue.enqueue(process_webhook_request, request_data.dict(), webhook_entry.id)
         logger.info(f"Webhook processed successfully for ID: {webhook_entry.id}")
         return {"status": "accepted", "id": webhook_entry.id, "job_id": job.id}
     except httpx.HTTPError as e:

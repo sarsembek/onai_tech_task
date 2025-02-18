@@ -4,6 +4,7 @@ from sqlalchemy import engine_from_config, pool
 from alembic import context
 from app.core.models.chat_history import ChatHistory
 from app.core.models.webhook_request import WebhookRequest
+from app.core.models.message import Message
 from app.db import Base
 from dotenv import load_dotenv
 

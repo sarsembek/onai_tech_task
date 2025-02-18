@@ -1,6 +1,16 @@
 from pydantic import BaseModel
-from typing import List, Dict, Any
+from typing import List
+
+class MessageSchema(BaseModel):
+    role: str
+    content: str
+
+    class Config:
+        orm_mode = True
 
 class ChatHistorySchema(BaseModel):
     session_id: str
-    messages: List[Dict[str, Any]]
+    messages: List[MessageSchema]
+
+    class Config:
+        orm_mode = True
