@@ -2,9 +2,9 @@ import os
 from openai import OpenAI
 from sqlalchemy.orm import Session
 from app.config import OPENAI_API_KEY
-from app.core.crud.chat_history import get_chat_history, save_chat_message
+from app.core.crud.chat_history import get_chat_history, save_chat_message, create_chat_history
 from app.core.crud.message import create_message
-from app.core.schemas.chat_history import MessageSchema
+from app.core.schemas.chat_history import MessageSchema, ChatHistorySchema
 import logging
 
 client = OpenAI(api_key=OPENAI_API_KEY)
@@ -19,7 +19,9 @@ def process_message(db: Session, session_id: str, message: str):
         chat_history = get_chat_history(db, session_id)
         
         if chat_history is None:
-            raise ValueError(f"No chat history found for session ID: {session_id}")
+            # Create a new chat history if it doesn't exist
+            chat_history = create_chat_history(db, ChatHistorySchema(session_id=session_id, messages=[]))
+            logger.info(f"Created new chat history for session ID: {session_id}")
         
         # Create a Message instance instead of appending a dict
         new_message = create_message(db, MessageSchema(role="user", content=message), chat_history.id)
