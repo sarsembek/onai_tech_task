@@ -14,8 +14,6 @@ def save_chat_message(db: Session, session_id: str, user_message: str, bot_respo
     chat = db.query(ChatHistory).filter(ChatHistory.session_id == session_id).first()
 
     if chat:
-        # Append the new messages
-        create_message(db, MessageSchema(role="user", content=user_message), chat.id)
         create_message(db, MessageSchema(role="assistant", content=bot_response), chat.id)
     else:
         # If no chat entry exists, create a new one with the first two messages
@@ -23,7 +21,6 @@ def save_chat_message(db: Session, session_id: str, user_message: str, bot_respo
         db.add(chat)
         db.commit()  # Commit to get the chat ID
         db.refresh(chat)  # Refresh to make sure it's in the session
-        create_message(db, MessageSchema(role="user", content=user_message), chat.id)
         create_message(db, MessageSchema(role="assistant", content=bot_response), chat.id)
 
     # Commit the changes to the database
