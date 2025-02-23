@@ -25,5 +25,5 @@ app.include_router(chat_history.router)
 def get_app_info():
     return {
         "app_name": settings.app_name,
-        "openai_api_key": f"{settings.openai_api_key[:4]}****"
+        "OPENAI_API_KEY": f"{settings.openai_api_key[:4]}****"
     }

@@ -1,13 +1,13 @@
 import os
 from openai import OpenAI
 from sqlalchemy.orm import Session
-from app.config import OPENAI_API_KEY
+from app.config import settings
 from app.core.crud.chat_history import get_chat_history, save_chat_message, create_chat_history
 from app.core.crud.message import create_message
 from app.core.schemas.chat_history import MessageSchema, ChatHistorySchema
 import logging
 
-client = OpenAI(api_key=OPENAI_API_KEY)
+client = OpenAI(api_key=settings.OPENAI_API_KEY)
 
 logger = logging.getLogger(__name__)
 

@@ -1,15 +1,17 @@
 import os
+from typing import Annotated, TypeVar
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 from dotenv import load_dotenv
 
 load_dotenv()
 
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+T = TypeVar("T")
+ExcludedField = Annotated[T, Field(exclude=True)]
 
 class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file="../.env")
     app_name: str = "onai"
-    openai_api_key: str
-    
-    model_config = SettingsConfigDict(env_file="../.env", extra="allow")
+    OPENAI_API_KEY: ExcludedField[str]
 
 settings = Settings()
